@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mini E-Commerce</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><a href="{{ url_for('home') }}">Dhruba Store</a></div>
+
+    <div class="search-area">
+      <form action="{{ url_for('home') }}" method="get">
+        <input type="text" name="q" placeholder="Search products or categories..." value="{{ q|default('') }}">
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <nav class="nav">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('cart') }}">Cart</a>
+      <a href="{{ url_for('wishlist') }}">Wishlist</a>
+      {% if current_user %}
+        <span class="muted">Hi, {{ current_user }}</span>
+        <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('signup') }}">Signup</a>
+      {% endif %}
+      {% if current_role == 'admin' %}
+        <a class="admin" href="{{ url_for('admin_dashboard') }}">Admin</a>
+      {% endif %}
+      <button id="dark-toggle">🌙</button>
+    </nav>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashwrap">
+          {% for cat,msg in messages %}
+            <div class="flash {{ cat }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+<script>
+const darkBtn = document.getElementById("dark-toggle");
+if (localStorage.getItem("darkmode") === "true") document.body.classList.add("dark");
+darkBtn?.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("darkmode", document.body.classList.contains("dark"));
+});
+</script>
+</body>
+</html>

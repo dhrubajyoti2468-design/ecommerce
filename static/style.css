@@ -1,0 +1,90 @@
+/* Basic reset */
+*{box-sizing:border-box}
+body{font-family:Inter,Arial,Helvetica,sans-serif;margin:0;background:#f5f7fb;color:#111;}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:#0b1226;color:#fff}
+.topbar a{color:inherit;text-decoration:none;margin-left:14px;font-weight:600}
+.brand a{color:inherit;text-decoration:none;font-size:20px;font-weight:800}
+.search-area form{display:flex;align-items:center}
+.search-area input{padding:8px 10px;border-radius:8px;border:1px solid #e2e8f0;width:320px}
+.search-area button{margin-left:8px;padding:8px 12px;border-radius:8px;border:none;background:#06b6d4;color:#fff;font-weight:700}
+
+/* Navbar items */
+.nav{display:flex;align-items:center;gap:8px}
+.nav .admin{background:#2563eb;padding:8px 12px;border-radius:8px;color:white}
+.muted{opacity:0.85;margin-left:8px;color:#cbd5e1}
+
+/* Flash */
+.flashwrap{padding:12px 28px}
+.flash{padding:10px 12px;border-radius:8px;margin-bottom:8px}
+.flash.success{background:#d1fae5;color:#065f46}
+.flash.error{background:#fee2e2;color:#991b1b}
+.flash.info{background:#e6f0ff;color:#0b4fe0}
+
+/* Hero */
+.hero{padding:28px;text-align:center}
+.hero h1{margin:0;font-size:36px}
+.hero .sub{color:#475569}
+
+/* Grid and cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;padding:18px 28px}
+.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(11,17,38,0.06);display:flex;flex-direction:column;align-items:center}
+.card img{width:180px;height:180px;object-fit:cover;border-radius:8px}
+.title{font-weight:700;margin-top:8px}
+.price{color:#059669;font-weight:800;margin-top:6px}
+.rating{margin-top:6px;color:#6b7280}
+.actions{margin-top:10px;display:flex;gap:8px}
+.btn{padding:8px 12px;border-radius:8px;background:#0b1226;color:#fff;text-decoration:none;font-weight:700}
+.btn.alt{background:#ef4444}
+.btn:hover{opacity:0.95}
+
+/* Chips */
+.filters{padding:8px 28px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:8px 12px;background:#e6eef7;border-radius:999px;color:#0b1226;text-decoration:none}
+.chip.active{background:#0b1226;color:#fff}
+
+/* Product page */
+.product-page{display:flex;gap:20px;padding:28px}
+.product-page .left img{width:420px;height:420px;object-fit:cover;border-radius:12px}
+.product-page .right{max-width:520px}
+.buy{display:flex;gap:10px;margin-top:10px}
+
+/* Auth boxes */
+.authbox{max-width:420px;margin:40px auto;background:#fff;padding:20px;border-radius:10px}
+.authbox input, .adminform input, .checkoutbox input, .checkoutbox textarea{width:100%;padding:8px;margin-top:8px;border-radius:8px;border:1px solid #e6eef7}
+
+/* Cart table */
+.cartbox{max-width:980px;margin:20px auto;padding:12px}
+.carttable{width:100%;border-collapse:collapse}
+.carttable th, .carttable td{padding:10px;border-bottom:1px solid #eef2f7}
+.prodcell{display:flex;gap:12px;align-items:center}
+.prodcell img{width:90px;height:70px;object-fit:cover;border-radius:8px}
+.cartbottom{display:flex;justify-content:space-between;padding:10px 0}
+
+/* Admin */
+.adminbox{max-width:1100px;margin:20px auto;padding:12px}
+.admintable{width:100%;border-collapse:collapse}
+.admintable th, .admintable td{padding:10px;border-bottom:1px solid #eef2f7}
+
+/* Orders and forms */
+.checkoutbox, .ordersbox, .adminform{max-width:720px;margin:26px auto;background:#fff;padding:18px;border-radius:10px}
+.ordercard{background:#fff;padding:10px;border-radius:8px;margin-bottom:10px}
+
+/* Links */
+.linkdel{color:#ef4444;text-decoration:none}
+
+/* Responsive */
+@media (max-width:880px){
+  .product-page{flex-direction:column;align-items:center}
+  .topbar{flex-direction:column;gap:10px;align-items:flex-start}
+}
+
+/* Dark mode */
+body.dark{background:#0b1226;color:#e6eef7}
+body.dark .topbar{background:#070815}
+body.dark .card, body.dark .authbox, body.dark .checkoutbox, body.dark .adminform{background:#0f1724}
+body.dark .btn{background:#06b6d4;color:#0b1226}
+body.dark .btn.alt{background:#ef4444;color:white}
+body.dark .search-area input{background:#0b1226;color:#fff;border:1px solid #1e293b}

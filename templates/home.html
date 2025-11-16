@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Mini E-Commerce Store</h1>
+  <p class="sub">Featured & trending picks</p>
+</section>
+
+<section class="featured">
+  <h2>Featured</h2>
+  <div class="grid">
+    {% for p in featured %}
+      <div class="card">
+        <a href="{{ url_for('product', pid=p.id) }}">
+          <img src="{{ p.img }}" alt="{{ p.name }}">
+        </a>
+        <div class="meta">
+          <div class="title">{{ p.name }}</div>
+          <div class="price">₹{{ p.price }}</div>
+          <div class="rating">{% if p.avg_rating %}⭐ {{ p.avg_rating }}{% else %}<span class="muted">No ratings</span>{% endif %}</div>
+          <div class="actions">
+            <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
+            <a class="btn alt" href="{{ url_for('wishlist_add', id=p.id) }}">♡ Wishlist</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="filters">
+  <h3>Categories</h3>
+  <div class="cats">
+    <a class="chip {% if not selected_category %}active{% endif %}" href="{{ url_for('home') }}">All</a>
+    {% for c in categories %}
+      <a class="chip {% if selected_category==c %}active{% endif %}" href="{{ url_for('home', category=c) }}">{{ c }}</a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="catalog">
+  <h2>All Products</h2>
+  <div class="grid">
+    {% for p in products %}
+      <div class="card">
+        <a href="{{ url_for('product', pid=p.id) }}"><img src="{{ p.img }}" alt="{{ p.name }}"></a>
+        <div class="meta">
+          <div class="title">{{ p.name }}</div>
+          <div class="price">₹{{ p.price }}</div>
+          <div class="rating">{% if p.avg_rating %}⭐ {{ p.avg_rating }}{% else %}<span class="muted">No ratings</span>{% endif %}</div>
+          <div class="actions">
+            <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
+            <a class="btn alt" href="{{ url_for('wishlist_add', id=p.id) }}">♡ Wishlist</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

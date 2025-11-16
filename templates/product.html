@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="product-page">
+  <div class="left">
+    <img src="{{ p.img }}" alt="{{ p.name }}">
+  </div>
+  <div class="right">
+    <h2>{{ p.name }}</h2>
+    <p class="price">₹{{ p.price }}</p>
+    <p class="muted">Category: {{ p.category }}</p>
+
+    <div class="rating">
+      {% if p.avg_rating %}⭐ {{ p.avg_rating }}{% else %}<span class="muted">No ratings yet</span>{% endif %}
+    </div>
+
+    <div class="buy">
+      <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
+      <a class="btn alt" href="{{ url_for('wishlist_add', id=p.id) }}">♡ Wishlist</a>
+    </div>
+
+    <hr>
+    <h4>Rate Product</h4>
+    <form action="{{ url_for('rate', pid=p.id) }}" method="post">
+      <select name="score">
+        <option value="5">5 - Excellent</option>
+        <option value="4">4 - Good</option>
+        <option value="3">3 - Okay</option>
+        <option value="2">2 - Poor</option>
+        <option value="1">1 - Terrible</option>
+      </select>
+      <button class="btn" type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

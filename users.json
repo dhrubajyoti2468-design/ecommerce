@@ -1,0 +1,8 @@
+[
+  {
+    "username": "dhruba",
+    "password": "scrypt:32768:8:1$YWKQbf5BbIBqPe0x$f99fa32f9ea1609aee8beff98ae55b97172105575a3e3cd6b03ccf156a77969c47280b392effe080f26c3ac78eef5a5865a66c2839de09764d1810e7de1bdd92859a63e7",
+    "role": "admin",
+    "wishlist": []
+  }
+]
