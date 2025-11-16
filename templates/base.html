@@ -3,42 +3,49 @@
 <head>
   <meta charset="utf-8">
   <title>Mini E-Commerce</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="{{ 'dark' if dark_mode }}">
   <header class="topbar">
-    <div class="brand"><a href="{{ url_for('home') }}">Dhruba Store</a></div>
-
-    <div class="search-area">
-      <form action="{{ url_for('home') }}" method="get">
-        <input type="text" name="q" placeholder="Search products or categories..." value="{{ q|default('') }}">
-        <button type="submit">Search</button>
-      </form>
+    <div class="container">
+      <h1><a href="{{ url_for('home') }}">Mini E-Commerce Store</a></h1>
+      <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('cart') }}">Cart</a>
+        <a href="{{ url_for('wishlist_view') }}">Wishlist</a>
+        {% if not current_user %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}">Signup</a>
+        {% else %}
+          <a href="{{ url_for('logout') }}">Logout ({{ current_user }})</a>
+        {% endif %}
+        {% if current_user %}
+          {% set u = current_user %}
+          {% for uu in (None,) %}
+          {% endfor %}
+        {% endif %}
+        <a href="{{ url_for('toggle_dark') }}">Toggle Dark</a>
+        {% if session.get('username') and ( (find_user := None) is not none ) %}
+        {% endif %}
+        {% if session.get('username') %}
+          {% set userobj = None %}
+        {% endif %}
+        {% if session.get('username') %}
+          {% set user = session.get('username') %}
+        {% endif %}
+        {% if session.get('username') %}
+          {% for u in users if u.username == session.get('username') %}{% endfor %}
+        {% endif %}
+      </nav>
     </div>
-
-    <nav class="nav">
-      <a href="{{ url_for('home') }}">Home</a>
-      <a href="{{ url_for('cart') }}">Cart</a>
-      <a href="{{ url_for('wishlist') }}">Wishlist</a>
-      {% if current_user %}
-        <span class="muted">Hi, {{ current_user }}</span>
-        <a href="{{ url_for('logout') }}">Logout</a>
-      {% else %}
-        <a href="{{ url_for('login') }}">Login</a>
-        <a href="{{ url_for('signup') }}">Signup</a>
-      {% endif %}
-      {% if current_role == 'admin' %}
-        <a class="admin" href="{{ url_for('admin_dashboard') }}">Admin</a>
-      {% endif %}
-      <button id="dark-toggle">🌙</button>
-    </nav>
   </header>
 
-  <main>
+  <main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="flashwrap">
-          {% for cat,msg in messages %}
+        <div class="flashes">
+          {% for cat, msg in messages %}
             <div class="flash {{ cat }}">{{ msg }}</div>
           {% endfor %}
         </div>
@@ -48,13 +55,8 @@
     {% block content %}{% endblock %}
   </main>
 
-<script>
-const darkBtn = document.getElementById("dark-toggle");
-if (localStorage.getItem("darkmode") === "true") document.body.classList.add("dark");
-darkBtn?.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-  localStorage.setItem("darkmode", document.body.classList.contains("dark"));
-});
-</script>
+  <footer class="container">
+    <small>© Mini Store</small>
+  </footer>
 </body>
 </html>

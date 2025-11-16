@@ -1,365 +1,391 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask import Flask, render_template, session, redirect, url_for, request, flash, jsonify
 import json, os
-from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "dhruba_secret_key_prod"  # change if you want
+app.secret_key = "dhruba_secret_key_changeThis!"  # change for production
 
-PRODUCTS_FILE = "products.json"
-USERS_FILE = "users.json"
-ORDERS_FILE = "orders.json"
+# File paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PRODUCTS_FILE = os.path.join(BASE_DIR, "products.json")
+USERS_FILE = os.path.join(BASE_DIR, "users.json")
+ORDERS_FILE = os.path.join(BASE_DIR, "orders.json")
 
-# ---------------- JSON helpers ----------------
+# Admin credentials default (also kept in users.json)
+ADMIN_USERNAME = "dhruba"
+ADMIN_PASSWORD = "00000000"
+
+# ---------- Utility: load/save JSON ----------
 def load_json(path, default):
     if not os.path.exists(path):
         with open(path, "w", encoding="utf-8") as f:
             json.dump(default, f, indent=2)
     with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            return default
 
 def save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
-def load_products():
-    return load_json(PRODUCTS_FILE, [])
+# ---------- Default starter files ----------
+DEFAULT_PRODUCTS = [
+    # minimal set; you can replace file content with the big list you had
+    {"id": 1, "name": "Laptop", "price": 249999, "img": "https://m.media-amazon.com/images/I/51PLKwik5fL._AC_UF1000,1000_QL80_.jpg", "category": "Computers", "ratings": [], "featured": True},
+    {"id": 2, "name": "Mouse", "price": 500, "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsosymxQez36xdfSK09thwVFBpiLX4whdG3g&s", "category": "Accessories", "ratings": [], "featured": False},
+    {"id": 3, "name": "Keyboard", "price": 1500, "img": "https://www.bbassets.com/media/uploads/p/l/40195886_2-dell-kb216-multimedia-keyboard-wired.jpg", "category": "Accessories", "ratings": [], "featured": False}
+]
 
-def save_products(products):
+DEFAULT_USERS = [
+    {"username": ADMIN_USERNAME, "password": ADMIN_PASSWORD, "is_admin": True, "wishlist": []}
+]
+
+DEFAULT_ORDERS = []
+
+# Ensure files exist and load
+products = load_json(PRODUCTS_FILE, DEFAULT_PRODUCTS)
+users = load_json(USERS_FILE, DEFAULT_USERS)
+orders = load_json(ORDERS_FILE, DEFAULT_ORDERS)
+
+# sync variables when saving
+def sync_products():
     save_json(PRODUCTS_FILE, products)
 
-def load_users():
-    return load_json(USERS_FILE, [])
-
-def save_users(users):
+def sync_users():
     save_json(USERS_FILE, users)
 
-def load_orders():
-    return load_json(ORDERS_FILE, [])
-
-def save_orders(orders):
+def sync_orders():
     save_json(ORDERS_FILE, orders)
 
-# ---------------- user helpers ----------------
+# ---------- Helpers ----------
+def find_product(pid):
+    for p in products:
+        if p["id"] == int(pid):
+            return p
+    return None
+
 def find_user(username):
-    users = load_users()
     for u in users:
-        if u.get("username") == username:
+        if u["username"] == username:
             return u
     return None
 
-def get_categories():
-    cats = set()
-    for p in load_products():
-        cats.add(p.get("category","Other"))
-    return sorted(list(cats))
+def login_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if not session.get("username"):
+            flash("Login required", "warning")
+            return redirect(url_for("login", next=request.path))
+        return f(*args, **kwargs)
+    return wrapped
 
-def avg_rating(product):
-    r = product.get("ratings", [])
-    return round(sum(r)/len(r),2) if r else None
+def admin_required(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        if not session.get("username"):
+            flash("Admin login required", "warning")
+            return redirect(url_for("login"))
+        user = find_user(session.get("username"))
+        if not user or not user.get("is_admin"):
+            flash("Admin required", "danger")
+            return redirect(url_for("home"))
+        return f(*args, **kwargs)
+    return wrapped
 
-# Inject current_user to templates
+# ---------- ROUTES ----------
+
 @app.context_processor
-def inject():
-    return dict(current_user=session.get("user"), current_role=session.get("role"))
+def inject_globals():
+    return {
+        "categories": sorted(list({p.get("category","Other") for p in products})),
+        "dark_mode": session.get("dark_mode", False),
+        "current_user": session.get("username")
+    }
 
-# ---------------- routes ----------------
-
+# Home with filters and search
 @app.route("/")
 def home():
-    q = request.args.get("q","").strip().lower()
-    cat = request.args.get("category","").strip()
-    products = load_products()
+    q = request.args.get("q", "").strip().lower()
+    cat = request.args.get("category", "")
+    only_featured = request.args.get("featured", "") == "1"
+
+    filtered = []
     for p in products:
-        p["avg_rating"] = avg_rating(p)
-    if cat:
-        products = [p for p in products if p.get("category","").lower() == cat.lower()]
-    if q:
-        products = [p for p in products if q in p.get("name","").lower() or q in p.get("category","").lower()]
-    categories = get_categories()
-    featured = products[:4]  # top 4 as featured (you can tweak)
-    return render_template("home.html", products=products, categories=categories, featured=featured, q=q, selected_category=cat)
+        ok = True
+        if q:
+            ok = q in p["name"].lower() or q in p.get("category","").lower()
+        if ok and cat:
+            ok = p.get("category","") == cat
+        if ok and only_featured:
+            ok = p.get("featured", False) is True
+        if ok:
+            # compute avg rating
+            rlist = p.get("ratings", [])
+            if rlist:
+                avg = sum(rlist)/len(rlist)
+            else:
+                avg = None
+            pi = p.copy()
+            pi["avg_rating"] = avg
+            filtered.append(pi)
+    return render_template("home.html", products=filtered)
 
-@app.route("/product/<int:pid>")
-def product(pid):
-    p = next((x for x in load_products() if x["id"] == pid), None)
+# Product detail (and rating submission)
+@app.route("/product/<int:pid>", methods=["GET", "POST"])
+def product_view(pid):
+    p = find_product(pid)
     if not p:
-        flash("Product not found","error")
+        flash("Product not found", "danger")
         return redirect(url_for("home"))
-    p["avg_rating"] = avg_rating(p)
-    return render_template("product.html", p=p)
-
-# ---------------- auth ----------------
-@app.route("/signup", methods=["GET","POST"])
-def signup():
     if request.method == "POST":
-        username = request.form.get("username","").strip()
-        password = request.form.get("password","").strip()
-        if not username or not password:
-            flash("Provide username and password","error")
-            return redirect(url_for("signup"))
-        if find_user(username):
-            flash("Username already exists","error")
-            return redirect(url_for("signup"))
-        users = load_users()
-        users.append({
-            "username": username,
-            "password": generate_password_hash(password),
-            "role": "user",
-            "wishlist": []
-        })
-        save_users(users)
-        flash("Account created. Login now.","success")
-        return redirect(url_for("login"))
-    return render_template("signup.html")
+        # rating form
+        try:
+            rating = int(request.form.get("rating", 0))
+            if 1 <= rating <= 5:
+                p.setdefault("ratings", []).append(rating)
+                sync_products()
+                flash("Thanks for rating!", "success")
+            else:
+                flash("Rating must be 1-5", "warning")
+        except Exception:
+            flash("Invalid rating", "warning")
+        return redirect(url_for("product_view", pid=pid))
+    return render_template("product.html", product=p)
 
-@app.route("/login", methods=["GET","POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username","").strip()
-        password = request.form.get("password","").strip()
-        user = find_user(username)
-        if not user or not check_password_hash(user.get("password",""), password):
-            flash("Invalid credentials","error")
-            return redirect(url_for("login"))
-        session["user"] = username
-        session["role"] = user.get("role","user")
-        flash(f"Welcome {username}","success")
-        return redirect(url_for("home"))
-    return render_template("login.html")
-
-@app.route("/logout")
-def logout():
-    session.pop("user", None)
-    session.pop("role", None)
-    flash("Logged out","info")
-    return redirect(url_for("home"))
-
-# ---------------- cart ----------------
+# Add to cart
 @app.route("/add/<int:pid>")
 def add_to_cart(pid):
     cart = session.get("cart", {})
     cart[str(pid)] = cart.get(str(pid), 0) + 1
     session["cart"] = cart
-    flash("Added to cart","success")
+    session.modified = True
+    flash("Added to cart", "success")
     return redirect(request.referrer or url_for("home"))
 
 @app.route("/cart")
 def cart():
     cart = session.get("cart", {})
-    products = load_products()
-    cart_items = []
+    items = []
     total = 0
     for pid_str, qty in cart.items():
-        pid = int(pid_str)
-        p = next((x for x in products if x["id"]==pid), None)
+        p = find_product(int(pid_str))
         if p:
             item = p.copy()
             item["qty"] = qty
             item["subtotal"] = qty * p["price"]
-            cart_items.append(item)
+            items.append(item)
             total += item["subtotal"]
-    return render_template("cart.html", items=cart_items, total=total)
+    return render_template("cart.html", items=items, total=total)
 
 @app.route("/cart/increase/<int:pid>")
-def cart_increase(pid):
-    cart = session.get("cart",{})
-    cart[str(pid)] = cart.get(str(pid),0) + 1
-    session["cart"] = cart; session.modified = True
+def increase(pid):
+    cart = session.get("cart", {})
+    cart[str(pid)] = cart.get(str(pid), 0) + 1
+    session["cart"] = cart
+    session.modified = True
     return redirect(url_for("cart"))
 
 @app.route("/cart/decrease/<int:pid>")
-def cart_decrease(pid):
-    cart = session.get("cart",{})
+def decrease(pid):
+    cart = session.get("cart", {})
     if str(pid) in cart:
         cart[str(pid)] -= 1
         if cart[str(pid)] <= 0:
             cart.pop(str(pid), None)
-    session["cart"] = cart; session.modified = True
+    session["cart"] = cart
+    session.modified = True
     return redirect(url_for("cart"))
 
 @app.route("/remove/<int:pid>")
-def cart_remove(pid):
-    cart = session.get("cart",{})
+def remove(pid):
+    cart = session.get("cart", {})
     cart.pop(str(pid), None)
-    session["cart"] = cart; session.modified = True
+    session["cart"] = cart
+    session.modified = True
     return redirect(url_for("cart"))
 
-# ---------------- wishlist ----------------
+# Checkout (simple)
+@app.route("/checkout", methods=["GET","POST"])
+def checkout():
+    if request.method == "POST":
+        cart = session.get("cart", {})
+        if not cart:
+            flash("Cart empty", "warning")
+            return redirect(url_for("cart"))
+        order = {
+            "id": len(orders)+1,
+            "user": session.get("username"),
+            "items": cart,
+            "total": sum(find_product(int(pid))["price"]*qty for pid,qty in cart.items() if find_product(int(pid))),
+            "created_at": datetime.utcnow().isoformat()
+        }
+        orders.append(order)
+        sync_orders()
+        session.pop("cart", None)
+        flash("Order placed, thank you!", "success")
+        return redirect(url_for("home"))
+    return render_template("checkout.html")
+
+# ---------- Wishlist ----------
 @app.route("/wishlist")
-def wishlist():
-    if "user" not in session:
-        flash("Login to view wishlist","error")
-        return redirect(url_for("login"))
-    user = find_user(session["user"])
-    prods = load_products()
-    items = [p for p in prods if p["id"] in user.get("wishlist",[])]
+def wishlist_view():
+    # for logged users persist in users.json, for visitors in session
+    wishlist = []
+    if session.get("username"):
+        user = find_user(session["username"])
+        wishlist = user.get("wishlist", []) if user else []
+    else:
+        wishlist = session.get("wishlist", [])
+    items = [find_product(pid) for pid in wishlist if find_product(pid)]
     return render_template("wishlist.html", items=items)
 
 @app.route("/wishlist/add/<int:pid>")
 def wishlist_add(pid):
-    if "user" not in session:
-        flash("Login to add to wishlist","error")
-        return redirect(url_for("login"))
-    users = load_users()
-    user = find_user(session["user"])
-    if pid not in user.get("wishlist",[]):
-        user.setdefault("wishlist",[]).append(pid)
-        save_users(users)
-        flash("Added to wishlist","success")
+    if session.get("username"):
+        user = find_user(session["username"])
+        if user:
+            user.setdefault("wishlist", [])
+            if pid not in user["wishlist"]:
+                user["wishlist"].append(pid)
+                sync_users()
+    else:
+        w = session.get("wishlist", [])
+        if pid not in w:
+            w.append(pid)
+            session["wishlist"] = w
+            session.modified = True
+    flash("Added to wishlist", "success")
     return redirect(request.referrer or url_for("home"))
 
 @app.route("/wishlist/remove/<int:pid>")
 def wishlist_remove(pid):
-    if "user" not in session:
-        flash("Login to remove wishlist","error")
-        return redirect(url_for("login"))
-    users = load_users()
-    user = find_user(session["user"])
-    if pid in user.get("wishlist",[]):
-        user["wishlist"].remove(pid)
-        save_users(users)
-        flash("Removed from wishlist","info")
-    return redirect(request.referrer or url_for("wishlist"))
+    if session.get("username"):
+        user = find_user(session["username"])
+        if user:
+            user["wishlist"] = [x for x in user.get("wishlist",[]) if x!=pid]
+            sync_users()
+    else:
+        w = session.get("wishlist", [])
+        session["wishlist"] = [x for x in w if x!=pid]
+        session.modified = True
+    flash("Removed from wishlist", "info")
+    return redirect(request.referrer or url_for("wishlist_view"))
 
-# ---------------- ratings ----------------
-@app.route("/rate/<int:pid>", methods=["POST"])
-def rate(pid):
-    if "user" not in session:
-        flash("Login to rate products","error")
-        return redirect(url_for("login"))
-    try:
-        score = int(request.form.get("score"))
-        if score < 1 or score > 5:
-            raise ValueError()
-    except:
-        flash("Invalid rating","error")
-        return redirect(request.referrer or url_for("product", pid=pid))
-    prods = load_products()
-    for p in prods:
-        if p["id"] == pid:
-            p.setdefault("ratings",[]).append(score)
-            save_products(prods)
-            flash("Thank you for rating","success")
-            return redirect(request.referrer or url_for("product", pid=pid))
-    flash("Product not found","error")
+# ---------- Auth ----------
+@app.route("/signup", methods=["GET","POST"])
+def signup():
+    if request.method == "POST":
+        uname = request.form.get("username","").strip()
+        pwd = request.form.get("password","")
+        if not uname or not pwd:
+            flash("Enter username and password", "warning")
+            return redirect(url_for("signup"))
+        if find_user(uname):
+            flash("Username taken", "warning")
+            return redirect(url_for("signup"))
+        new = {"username": uname, "password": pwd, "is_admin": False, "wishlist": []}
+        users.append(new)
+        sync_users()
+        session["username"] = uname
+        flash("Signup success. Logged in.", "success")
+        return redirect(url_for("home"))
+    return render_template("signup.html")
+
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        uname = request.form.get("username","").strip()
+        pwd = request.form.get("password","")
+        user = find_user(uname)
+        if user and user.get("password") == pwd:
+            session["username"] = uname
+            flash("Logged in", "success")
+            return redirect(request.args.get("next") or url_for("home"))
+        flash("Invalid credentials", "danger")
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.pop("username", None)
+    flash("Logged out", "info")
     return redirect(url_for("home"))
 
-# ---------------- checkout & orders ----------------
-@app.route("/checkout", methods=["GET","POST"])
-def checkout():
-    if "user" not in session:
-        flash("Login to checkout","error")
-        return redirect(url_for("login"))
-    cart = session.get("cart",{})
-    if not cart:
-        flash("Cart is empty","error")
-        return redirect(url_for("cart"))
-    if request.method == "POST":
-        name = request.form.get("name","").strip()
-        phone = request.form.get("phone","").strip()
-        address = request.form.get("address","").strip()
-        city = request.form.get("city","").strip()
-        pincode = request.form.get("pincode","").strip()
-        prods = load_products()
-        items = []
-        total = 0
-        for pid_str, qty in cart.items():
-            pid = int(pid_str)
-            p = next((x for x in prods if x["id"]==pid), None)
-            if p:
-                subtotal = p["price"] * qty
-                total += subtotal
-                items.append({"id":p["id"],"name":p["name"],"price":p["price"],"qty":qty,"subtotal":subtotal})
-        orders = load_orders()
-        new_order = {
-            "user": session["user"],
-            "items": items,
-            "total": total,
-            "address": {"name":name,"phone":phone,"address":address,"city":city,"pincode":pincode},
-            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
-        orders.append(new_order)
-        save_orders(orders)
-        session.pop("cart", None)
-        flash("Order placed successfully","success")
-        return redirect(url_for("orders"))
-    return render_template("checkout.html")
-
-@app.route("/orders")
-def orders():
-    if "user" not in session:
-        flash("Login to view orders","error")
-        return redirect(url_for("login"))
-    all_orders = load_orders()
-    user_orders = [o for o in all_orders if o["user"] == session["user"]]
-    return render_template("orders.html", orders=user_orders)
-
-# ---------------- admin (protected) ----------------
-def is_admin():
-    return session.get("role") == "admin"
-
+# ---------- Admin ----------
 @app.route("/admin")
+@admin_required
 def admin_dashboard():
-    if not is_admin():
-        flash("Admin only","error")
-        return redirect(url_for("login"))
-    prods = load_products()
-    return render_template("admin_dashboard.html", products=prods)
+    return render_template("admin_dashboard.html", products=products)
 
 @app.route("/admin/add", methods=["GET","POST"])
+@admin_required
 def admin_add():
-    if not is_admin():
-        flash("Admin only","error")
-        return redirect(url_for("login"))
     if request.method == "POST":
-        name = request.form.get("name","").strip()
-        price = float(request.form.get("price","0"))
-        img = request.form.get("img","").strip()
-        category = request.form.get("category","").strip()
-        prods = load_products()
-        new_id = max([p.get("id",0) for p in prods] or [0]) + 1
-        prods.append({"id":new_id,"name":name,"price":price,"img":img,"category":category,"ratings":[]})
-        save_products(prods)
-        flash("Product added","success")
+        name = request.form.get("name")
+        price = int(request.form.get("price") or 0)
+        img = request.form.get("img")
+        category = request.form.get("category") or "Other"
+        featured = request.form.get("featured") == "on"
+        new_id = max([p["id"] for p in products] or [0]) + 1
+        new_p = {"id": new_id, "name": name, "price": price, "img": img, "category": category, "ratings": [], "featured": featured}
+        products.append(new_p)
+        sync_products()
+        flash("Product added", "success")
         return redirect(url_for("admin_dashboard"))
     return render_template("admin_add.html")
 
 @app.route("/admin/edit/<int:pid>", methods=["GET","POST"])
+@admin_required
 def admin_edit(pid):
-    if not is_admin():
-        flash("Admin only","error")
-        return redirect(url_for("login"))
-    prods = load_products()
-    prod = next((p for p in prods if p["id"]==pid), None)
-    if not prod:
-        flash("Product not found","error")
+    p = find_product(pid)
+    if not p:
+        flash("Not found", "danger")
         return redirect(url_for("admin_dashboard"))
     if request.method == "POST":
-        prod["name"] = request.form.get("name","").strip()
-        prod["price"] = float(request.form.get("price","0"))
-        prod["img"] = request.form.get("img","").strip()
-        prod["category"] = request.form.get("category","").strip()
-        save_products(prods)
-        flash("Product updated","success")
+        p["name"] = request.form.get("name")
+        p["price"] = int(request.form.get("price") or 0)
+        p["img"] = request.form.get("img")
+        p["category"] = request.form.get("category")
+        p["featured"] = request.form.get("featured") == "on"
+        sync_products()
+        flash("Product updated", "success")
         return redirect(url_for("admin_dashboard"))
-    return render_template("admin_edit.html", p=prod)
+    return render_template("admin_edit.html", product=p)
 
 @app.route("/admin/delete/<int:pid>")
+@admin_required
 def admin_delete(pid):
-    if not is_admin():
-        flash("Admin only","error")
-        return redirect(url_for("login"))
-    prods = load_products()
-    prods = [p for p in prods if p["id"] != pid]
-    save_products(prods)
-    flash("Product deleted","info")
+    global products
+    products[:] = [p for p in products if p["id"] != pid]
+    sync_products()
+    flash("Deleted", "info")
     return redirect(url_for("admin_dashboard"))
 
-# ---------------- start ----------------
+# Dark mode toggle
+@app.route("/toggle-dark")
+def toggle_dark():
+    session["dark_mode"] = not session.get("dark_mode", False)
+    session.modified = True
+    return redirect(request.referrer or url_for("home"))
+
+# API route for quick rating via AJAX (optional)
+@app.route("/api/rate/<int:pid>", methods=["POST"])
+def api_rate(pid):
+    p = find_product(pid)
+    if not p:
+        return jsonify({"error":"not found"}), 404
+    try:
+        r = int(request.json.get("rating"))
+        if 1 <= r <= 5:
+            p.setdefault("ratings", []).append(r)
+            sync_products()
+            return jsonify({"ok": True})
+    except:
+        pass
+    return jsonify({"error":"invalid"}), 400
+
+# Run
 if __name__ == "__main__":
-    # ensure files exist with defaults
-    load_products()
-    load_users()
-    load_orders()
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5000)

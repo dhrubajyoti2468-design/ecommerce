@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="adminform">
-  <h2>Add Product</h2>
-  <form method="post">
-    <label>Name</label><input name="name" required>
-    <label>Price</label><input name="price" type="number" required>
-    <label>Image URL</label><input name="img" required>
-    <label>Category</label><input name="category" required>
-    <button class="btn" type="submit">Add</button>
-  </form>
-</div>
+<h2>Edit Product</h2>
+<form method="post">
+  <label>Name <input name="name" value="{{ product.name }}"></label><br>
+  <label>Price <input name="price" type="number" value="{{ product.price }}"></label><br>
+  <label>Image URL <input name="img" value="{{ product.img }}"></label><br>
+  <label>Category <input name="category" value="{{ product.category }}"></label><br>
+  <label>Featured <input name="featured" type="checkbox" {% if product.featured %}checked{% endif %}></label><br>
+  <button>Save</button>
+</form>
 {% endblock %}

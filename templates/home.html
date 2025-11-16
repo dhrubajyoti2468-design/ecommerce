@@ -1,59 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero">
-  <h1>Mini E-Commerce Store</h1>
-  <p class="sub">Featured & trending picks</p>
-</section>
+<h2>Browse Products</h2>
 
-<section class="featured">
-  <h2>Featured</h2>
-  <div class="grid">
-    {% for p in featured %}
-      <div class="card">
-        <a href="{{ url_for('product', pid=p.id) }}">
-          <img src="{{ p.img }}" alt="{{ p.name }}">
-        </a>
-        <div class="meta">
-          <div class="title">{{ p.name }}</div>
-          <div class="price">₹{{ p.price }}</div>
-          <div class="rating">{% if p.avg_rating %}⭐ {{ p.avg_rating }}{% else %}<span class="muted">No ratings</span>{% endif %}</div>
-          <div class="actions">
-            <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
-            <a class="btn alt" href="{{ url_for('wishlist_add', id=p.id) }}">♡ Wishlist</a>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-</section>
-
-<section class="filters">
-  <h3>Categories</h3>
-  <div class="cats">
-    <a class="chip {% if not selected_category %}active{% endif %}" href="{{ url_for('home') }}">All</a>
+<form method="get" class="filters">
+  <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q','') }}">
+  <select name="category">
+    <option value="">All Categories</option>
     {% for c in categories %}
-      <a class="chip {% if selected_category==c %}active{% endif %}" href="{{ url_for('home', category=c) }}">{{ c }}</a>
+      <option value="{{ c }}" {% if request.args.get('category') == c %}selected{% endif %}>{{ c }}</option>
     {% endfor %}
-  </div>
-</section>
+  </select>
+  <label><input type="checkbox" name="featured" value="1" {% if request.args.get('featured')=='1' %}checked{% endif %}> Featured</label>
+  <button>Filter</button>
+</form>
 
-<section class="catalog">
-  <h2>All Products</h2>
-  <div class="grid">
-    {% for p in products %}
-      <div class="card">
-        <a href="{{ url_for('product', pid=p.id) }}"><img src="{{ p.img }}" alt="{{ p.name }}"></a>
-        <div class="meta">
-          <div class="title">{{ p.name }}</div>
-          <div class="price">₹{{ p.price }}</div>
-          <div class="rating">{% if p.avg_rating %}⭐ {{ p.avg_rating }}{% else %}<span class="muted">No ratings</span>{% endif %}</div>
-          <div class="actions">
-            <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
-            <a class="btn alt" href="{{ url_for('wishlist_add', id=p.id) }}">♡ Wishlist</a>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
+<div class="grid">
+  {% for p in products %}
+  <div class="card">
+    <img src="{{ p.img }}" alt="{{ p.name }}">
+    <h3>{{ p.name }}</h3>
+    <p class="price">₹{{ p.price }}</p>
+    <p class="cat">{{ p.category }}</p>
+    {% if p.avg_rating %}
+      <p class="rating">Avg: {{ "%.1f"|format(p.avg_rating) }} / 5</p>
+    {% endif %}
+    <div class="card-actions">
+      <a class="btn" href="{{ url_for('product_view', pid=p.id) }}">View</a>
+      <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
+      <a class="btn" href="{{ url_for('wishlist_add', pid=p.id) }}">♡ Wishlist</a>
+    </div>
   </div>
-</section>
+  {% endfor %}
+</div>
 {% endblock %}

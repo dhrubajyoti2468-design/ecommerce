@@ -1,33 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="cartbox">
-  <h2>Your Cart</h2>
-  {% if items %}
-    <table class="carttable">
-      <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
-      <tbody>
-      {% for i in items %}
-        <tr>
-          <td class="prodcell"><img src="{{ i.img }}" alt="{{ i.name }}"><div>{{ i.name }}</div></td>
-          <td>₹{{ i.price }}</td>
-          <td>
-            <a href="{{ url_for('cart_decrease', pid=i.id) }}">−</a>
-            <strong>{{ i.qty }}</strong>
-            <a href="{{ url_for('cart_increase', pid=i.id) }}">+</a>
-          </td>
-          <td>₹{{ i.subtotal }}</td>
-          <td><a href="{{ url_for('cart_remove', pid=i.id) }}" class="linkdel">Remove</a></td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-
-    <div class="cartbottom">
-      <div class="total">Total: ₹{{ total }}</div>
-      <div><a class="btn" href="{{ url_for('checkout') }}">Proceed to Checkout</a></div>
-    </div>
-  {% else %}
-    <p>Your cart is empty. <a href="{{ url_for('home') }}">Go shopping</a></p>
-  {% endif %}
-</div>
+<h2>Your Cart</h2>
+{% if items %}
+  <table class="cart-table">
+    <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
+    {% for it in items %}
+      <tr>
+        <td>{{ it.name }}</td>
+        <td>₹{{ it.price }}</td>
+        <td>
+          <a href="{{ url_for('decrease', pid=it.id) }}">-</a>
+          {{ it.qty }}
+          <a href="{{ url_for('increase', pid=it.id) }}">+</a>
+        </td>
+        <td>₹{{ it.subtotal }}</td>
+        <td><a href="{{ url_for('remove', pid=it.id) }}">Remove</a></td>
+      </tr>
+    {% endfor %}
+  </table>
+  <p class="total">Total: ₹{{ total }}</p>
+  <a class="btn" href="{{ url_for('checkout') }}">Checkout</a>
+{% else %}
+  <p>Your cart is empty.</p>
+{% endif %}
 {% endblock %}

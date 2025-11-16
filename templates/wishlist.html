@@ -1,23 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="wishbox">
-  <h2>Your Wishlist</h2>
-  {% if items %}
-    <div class="grid">
-      {% for p in items %}
+<h2>Your Wishlist</h2>
+{% if items %}
+  <div class="grid">
+    {% for p in items %}
       <div class="card">
         <img src="{{ p.img }}" alt="{{ p.name }}">
-        <div class="title">{{ p.name }}</div>
-        <div class="price">₹{{ p.price }}</div>
-        <div class="actions">
-          <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
-          <a class="btn alt" href="{{ url_for('wishlist_remove', pid=p.id) }}">Remove</a>
-        </div>
+        <h3>{{ p.name }}</h3>
+        <p>₹{{ p.price }}</p>
+        <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
+        <a class="btn" href="{{ url_for('wishlist_remove', pid=p.id) }}">Remove</a>
       </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <p>Your wishlist is empty.</p>
-  {% endif %}
-</div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>No items in wishlist.</p>
+{% endif %}
 {% endblock %}

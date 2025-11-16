@@ -1,24 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="adminbox">
-  <h2>Admin Dashboard</h2>
-  <a class="btn" href="{{ url_for('admin_add') }}">Add Product</a>
-  <table class="admintable">
-    <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Category</th><th>Actions</th></tr></thead>
-    <tbody>
-      {% for p in products %}
-        <tr>
-          <td>{{ p.id }}</td>
-          <td>{{ p.name }}</td>
-          <td>₹{{ p.price }}</td>
-          <td>{{ p.category }}</td>
-          <td>
-            <a href="{{ url_for('admin_edit', pid=p.id) }}">Edit</a> |
-            <a href="{{ url_for('admin_delete', pid=p.id) }}" class="linkdel">Delete</a>
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+<h2>Admin Dashboard</h2>
+<a class="btn" href="{{ url_for('admin_add') }}">Add Product</a>
+<table>
+  <tr><th>ID</th><th>Name</th><th>Price</th><th>Category</th><th>Featured</th><th>Actions</th></tr>
+  {% for p in products %}
+  <tr>
+    <td>{{ p.id }}</td>
+    <td>{{ p.name }}</td>
+    <td>₹{{ p.price }}</td>
+    <td>{{ p.category }}</td>
+    <td>{{ p.featured }}</td>
+    <td>
+      <a href="{{ url_for('admin_edit', pid=p.id) }}">Edit</a> |
+      <a href="{{ url_for('admin_delete', pid=p.id) }}" onclick="return confirm('Delete?')">Delete</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
 {% endblock %}
