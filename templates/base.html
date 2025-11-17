@@ -4,22 +4,31 @@
   <meta charset="utf-8">
   <title>NightOwl Hub</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="{{ 'dark' if dark_mode }}">
+
+<body class="{% if dark_mode %}dark{% endif %}">
   <header class="topbar">
     <div class="container">
       <h1><a href="{{ url_for('home') }}">NightOwl Hub</a></h1>
+
       <nav>
         <a href="{{ url_for('home') }}">Home</a>
         <a href="{{ url_for('cart') }}">Cart</a>
         <a href="{{ url_for('wishlist_view') }}">Wishlist</a>
 
-        {% if not current_user %}
+        {% if current_user %}
+          <a href="{{ url_for('logout') }}">Logout ({{ current_user }})</a>
+
+          {% set u = find_user(current_user) %}
+          {% if u and u.is_admin %}
+            <a href="{{ url_for('admin_dashboard') }}">Admin</a>
+          {% endif %}
+
+        {% else %}
           <a href="{{ url_for('login') }}">Login</a>
           <a href="{{ url_for('signup') }}">Signup</a>
-        {% else %}
-          <a href="{{ url_for('logout') }}">Logout ({{ current_user }})</a>
         {% endif %}
 
         <a href="{{ url_for('toggle_dark') }}">Dark Mode</a>
@@ -44,5 +53,6 @@
   <footer>
     <small>© 2025 NightOwl Hub</small>
   </footer>
+
 </body>
 </html>
