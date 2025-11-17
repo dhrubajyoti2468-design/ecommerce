@@ -1,25 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
+
 <h2>Your Cart</h2>
+
 <div class="cart-box">
-  {% if items %}
-    <table width="100%">
-      <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
-      <tbody>
-      {% for it in items %}
-        <tr>
-          <td>{{ it.name }}</td>
-          <td>₹{{ it.price }}</td>
-          <td><a href="{{ url_for('decrease', pid=it.id) }}">-</a> {{ it.qty }} <a href="{{ url_for('increase', pid=it.id) }}">+</a></td>
-          <td>₹{{ it.subtotal }}</td>
-          <td><a href="{{ url_for('remove', pid=it.id) }}">Remove</a></td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-    <div style="text-align:right;margin-top:12px">Total: ₹{{ total }} <a class="btn" href="{{ url_for('checkout') }}">Checkout</a></div>
-  {% else %}
+  {% if not items %}
     <p>Your cart is empty.</p>
+  {% else %}
+    <table width="100%">
+      <tr>
+        <th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th>
+      </tr>
+
+      {% for item in items %}
+      <tr>
+        <td>{{ item.name }}</td>
+        <td>₹{{ item.price }}</td>
+        <td>{{ item.qty }}</td>
+        <td>₹{{ item.subtotal }}</td>
+        <td>
+          <a href="{{ url_for('remove', pid=item.id) }}">Remove</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <h3>Total: ₹{{ total }}</h3>
+    <a class="btn" href="{{ url_for('checkout') }}">Checkout</a>
   {% endif %}
 </div>
+
 {% endblock %}
