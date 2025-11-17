@@ -1,29 +1,38 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="product-page">
-  <img src="{{ product.img }}" alt="{{ product.name }}">
-  <div class="details">
-    <h2>{{ product.name }}</h2>
-    <p>Category: {{ product.category }}</p>
-    <p class="price">₹{{ product.price }}</p>
-    {% if product.ratings %}
-      <p>Average rating: {{ ('%.1f' % (sum(product.ratings)/len(product.ratings))) }} ({{ product.ratings|length }} ratings)</p>
-    {% endif %}
-    <a class="btn" href="{{ url_for('add_to_cart', pid=product.id) }}">Add to cart</a>
-    <a class="btn" href="{{ url_for('wishlist_add', pid=product.id) }}">Add to wishlist</a>
 
-    <hr>
-    <h3>Rate this product</h3>
-    <form method="post">
+<div class="product-detail glass-card">
+  <img class="product-image" src="{{ product.img }}" alt="{{ product.name }}">
+
+  <div class="info">
+    <h2>{{ product.name }}</h2>
+    <p class="price">₹{{ product.price }}</p>
+    <p class="category">Category: {{ product.category }}</p>
+
+    {% if product.ratings and product.ratings|length > 0 %}
+      <p class="rating">⭐ {{ "%.1f"|format((product.ratings | sum) / (product.ratings | length)) }} / 5</p>
+      <p>{{ product.ratings|length }} Reviews</p>
+    {% else %}
+      <p class="rating no-rating">No ratings yet</p>
+    {% endif %}
+
+    <form method="post" class="rate-box">
+      <label>Rate this product</label>
       <select name="rating">
-        <option value="5">5 — Excellent</option>
-        <option value="4">4 — Good</option>
-        <option value="3">3 — OK</option>
-        <option value="2">2 — Poor</option>
-        <option value="1">1 — Terrible</option>
+        <option value="5">5 - Excellent</option>
+        <option value="4">4 - Good</option>
+        <option value="3">3 - Okay</option>
+        <option value="2">2 - Poor</option>
+        <option value="1">1 - Terrible</option>
       </select>
-      <button>Submit rating</button>
+      <button class="btn-primary" type="submit">Submit</button>
     </form>
+
+    <div class="actions" style="margin-top:10px;">
+      <a class="btn" href="{{ url_for('add_to_cart', pid=product.id) }}">Add to Cart</a>
+      <a class="btn" href="{{ url_for('wishlist_add', pid=product.id) }}">♡ Wishlist</a>
+    </div>
   </div>
 </div>
+
 {% endblock %}

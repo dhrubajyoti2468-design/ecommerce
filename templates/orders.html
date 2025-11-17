@@ -1,21 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="ordersbox">
-  <h2>My Orders</h2>
-  {% if orders %}
+<h2>Orders</h2>
+{% if orders %}
+  <table style="width:100%;">
+    <tr><th>ID</th><th>User</th><th>Items</th><th>Total</th><th>Date</th></tr>
     {% for o in orders %}
-      <div class="ordercard">
-        <div class="meta">Order at {{ o.timestamp }}</div>
-        <ul>
-          {% for it in o.items %}
-            <li>{{ it.name }} ×{{ it.qty }} — ₹{{ it.subtotal }}</li>
-          {% endfor %}
-        </ul>
-        <div class="total">Total: ₹{{ o.total }}</div>
-      </div>
+      <tr>
+        <td>{{ o.id }}</td>
+        <td>{{ o.user }}</td>
+        <td>{{ o.items }}</td>
+        <td>₹{{ o.total }}</td>
+        <td>{{ o.created_at }}</td>
+      </tr>
     {% endfor %}
-  {% else %}
-    <p>No orders yet.</p>
-  {% endif %}
-</div>
+  </table>
+{% else %}
+  <p>No orders yet.</p>
+{% endif %}
 {% endblock %}

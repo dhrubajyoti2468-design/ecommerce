@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Login</h2>
-<form method="post">
-  <label>Username <input name="username"></label>
-  <label>Password <input type="password" name="password"></label>
-  <button>Login</button>
-</form>
+<div class="glass-card" style="max-width:420px;">
+  <form method="post">
+    <label>Username <input name="username" required></label><br><br>
+    <label>Password <input type="password" name="password" required></label><br><br>
+    <button class="btn-primary" type="submit">Login</button>
+  </form>
+</div>
 {% endblock %}

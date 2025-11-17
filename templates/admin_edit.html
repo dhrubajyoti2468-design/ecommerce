@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Edit Product</h2>
-<form method="post">
-  <label>Name <input name="name" value="{{ product.name }}"></label><br>
-  <label>Price <input name="price" type="number" value="{{ product.price }}"></label><br>
-  <label>Image URL <input name="img" value="{{ product.img }}"></label><br>
-  <label>Category <input name="category" value="{{ product.category }}"></label><br>
-  <label>Featured <input name="featured" type="checkbox" {% if product.featured %}checked{% endif %}></label><br>
-  <button>Save</button>
-</form>
+<div class="glass-card" style="max-width:620px;">
+  <form method="post">
+    <label>Name <input name="name" value="{{ product.name }}" required></label><br><br>
+    <label>Price <input name="price" type="number" value="{{ product.price }}" required></label><br><br>
+    <label>Image URL <input name="img" value="{{ product.img }}"></label><br><br>
+    <label>Category <input name="category" value="{{ product.category }}"></label><br><br>
+    <label>Featured <input name="featured" type="checkbox" {% if product.featured %}checked{% endif %}></label><br><br>
+    <button class="btn-primary">Save</button>
+  </form>
+</div>
 {% endblock %}

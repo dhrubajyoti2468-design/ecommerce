@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Checkout</h2>
-<form method="post">
-  <p>Confirm order and place it.</p>
-  <button>Place Order</button>
-</form>
+<div class="glass-card" style="padding:14px;">
+  <p>Confirm your order and place it. This demo stores orders to `orders.json`.</p>
+  <form method="post">
+    <button class="btn-primary">Place Order</button>
+  </form>
+</div>
 {% endblock %}

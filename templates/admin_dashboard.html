@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Admin Dashboard</h2>
-<a class="btn" href="{{ url_for('admin_add') }}">Add Product</a>
-<table>
+
+<a class="btn-primary" href="{{ url_for('admin_add') }}">Add Product</a>
+
+<table style="width:100%;margin-top:12px;">
   <tr><th>ID</th><th>Name</th><th>Price</th><th>Category</th><th>Featured</th><th>Actions</th></tr>
   {% for p in products %}
   <tr>

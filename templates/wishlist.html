@@ -2,15 +2,17 @@
 {% block content %}
 <h2>Your Wishlist</h2>
 {% if items %}
-  <div class="grid">
+  <div class="product-grid">
     {% for p in items %}
-      <div class="card">
-        <img src="{{ p.img }}" alt="{{ p.name }}">
-        <h3>{{ p.name }}</h3>
-        <p>₹{{ p.price }}</p>
+    <div class="product-card glass-card">
+      <img src="{{ p.img }}" alt="{{ p.name }}">
+      <h3>{{ p.name }}</h3>
+      <p class="price">₹{{ p.price }}</p>
+      <div class="actions">
         <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
         <a class="btn" href="{{ url_for('wishlist_remove', pid=p.id) }}">Remove</a>
       </div>
+    </div>
     {% endfor %}
   </div>
 {% else %}

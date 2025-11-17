@@ -2,9 +2,10 @@
 {% block content %}
 <h2>Your Cart</h2>
 {% if items %}
-  <table class="cart-table">
-    <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
-    {% for it in items %}
+  <div class="glass-card" style="padding:12px;">
+    <table style="width:100%;">
+      <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr>
+      {% for it in items %}
       <tr>
         <td>{{ it.name }}</td>
         <td>₹{{ it.price }}</td>
@@ -16,10 +17,12 @@
         <td>₹{{ it.subtotal }}</td>
         <td><a href="{{ url_for('remove', pid=it.id) }}">Remove</a></td>
       </tr>
-    {% endfor %}
-  </table>
-  <p class="total">Total: ₹{{ total }}</p>
-  <a class="btn" href="{{ url_for('checkout') }}">Checkout</a>
+      {% endfor %}
+    </table>
+
+    <p style="text-align:right;font-weight:700;margin-top:12px;">Total: ₹{{ total }}</p>
+    <div style="text-align:right;"><a class="btn-primary" href="{{ url_for('checkout') }}">Checkout</a></div>
+  </div>
 {% else %}
   <p>Your cart is empty.</p>
 {% endif %}
