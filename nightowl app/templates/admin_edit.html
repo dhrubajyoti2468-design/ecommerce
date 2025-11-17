@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit Product</h2>
+<form method="post" style="max-width:520px">
+  <div><input name="name" value="{{ product.name }}" required></div>
+  <div style="margin-top:8px"><input name="price" value="{{ product.price }}" required></div>
+  <div style="margin-top:8px"><input name="img" value="{{ product.img }}"></div>
+  <div style="margin-top:8px"><input name="category" value="{{ product.category }}"></div>
+  <div style="margin-top:8px"><label><input type="checkbox" name="featured" {% if product.featured %}checked{% endif %}> Featured</label></div>
+  <div style="margin-top:12px"><button class="btn">Save</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Browse Products</h2>
+
+<form method="get" class="filters">
+  <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q','') }}">
+  <select name="category">
+    <option value="">All Categories</option>
+    {% for c in categories %}
+      <option value="{{ c }}" {% if request.args.get('category') == c %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  <label><input type="checkbox" name="featured" value="1" {% if request.args.get('featured')=='1' %}checked{% endif %}> Featured</label>
+  <button>Filter</button>
+</form>
+
+<div class="grid">
+  {% for p in products %}
+  <div class="card">
+    {% if p.featured %}
+      <div style="position:absolute;top:8px;left:8px;background:linear-gradient(90deg,var(--accent),#7f4af6);padding:6px 10px;border-radius:8px;color:#fff;font-weight:800;font-size:12px">FEATURED</div>
+    {% endif %}
+    <img src="{{ p.img }}" alt="{{ p.name }}">
+    <h3>{{ p.name }}</h3>
+    <div class="price">₹{{ p.price }}</div>
+    <div class="cat">{{ p.category }}</div>
+    {% if p.avg_rating %}
+      <div class="rating">★ {{ '%.1f'|format(p.avg_rating) }} / 5</div>
+    {% endif %}
+    <div style="margin-top:10px">
+      <a class="btn" href="{{ url_for('product', pid=p.id) }}">View</a>
+      <a class="btn" href="{{ url_for('add_to_cart', pid=p.id) }}">Add to Cart</a>
+      <a class="btn btn-outline" href="{{ url_for('wishlist_add', pid=p.id) }}">♡ Wishlist</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
