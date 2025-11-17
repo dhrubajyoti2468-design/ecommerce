@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Signup</h2>
-<div class="glass-card" style="max-width:420px;">
-  <form method="post">
-    <label>Username <input name="username" required></label><br><br>
-    <label>Password <input type="password" name="password" required></label><br><br>
-    <button class="btn-primary" type="submit">Signup</button>
-  </form>
-</div>
+<form method="post" style="max-width:360px">
+  <div><input name="username" placeholder="Username" required></div>
+  <div style="margin-top:8px"><input name="password" type="password" placeholder="Password" required></div>
+  <div style="margin-top:12px"><button class="btn" type="submit">Signup</button></div>
+</form>
 {% endblock %}

@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Add Product</h2>
-<div class="glass-card" style="max-width:620px;">
-  <form method="post">
-    <label>Name <input name="name" required></label><br><br>
-    <label>Price <input name="price" type="number" required></label><br><br>
-    <label>Image URL <input name="img"></label><br><br>
-    <label>Category <input name="category"></label><br><br>
-    <label>Featured <input name="featured" type="checkbox"></label><br><br>
-    <button class="btn-primary">Add Product</button>
-  </form>
-</div>
+<form method="post" style="max-width:520px">
+  <div><input name="name" placeholder="Name" required></div>
+  <div style="margin-top:8px"><input name="price" placeholder="Price" required></div>
+  <div style="margin-top:8px"><input name="img" placeholder="Image URL"></div>
+  <div style="margin-top:8px"><input name="category" placeholder="Category"></div>
+  <div style="margin-top:8px"><label><input type="checkbox" name="featured"> Featured</label></div>
+  <div style="margin-top:12px"><button class="btn">Add</button></div>
+</form>
 {% endblock %}

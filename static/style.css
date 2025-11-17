@@ -1,256 +1,49 @@
-/* =====================================================
-   GLOBAL RESET & THEME
-   ===================================================== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+:root{
+  --bg:#f6f6f8;
+  --card:#fff;
+  --muted:#666;
+  --accent:#7f4af6;
+  --text:#111;
 }
+body{font-family:Inter,system-ui,Segoe UI,Arial; margin:0;background:var(--bg);color:var(--text);}
+a{color:inherit;text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:36px}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  transition: background 0.3s, color 0.3s;
-}
+/* topbar */
+.topbar{background:linear-gradient(180deg,rgba(0,0,0,0.03),transparent);box-shadow:0 8px 20px rgba(0,0,0,0.08);position:sticky;top:0;z-index:10}
+.topbar .container{display:flex;align-items:center;justify-content:space-between;padding:18px 36px}
+.topbar h1{margin:0;color:var(--accent);font-weight:800}
+.topbar nav a{margin-left:16px;color:#222;opacity:0.9}
 
-:root {
-  --bg: #f5f5f7;
-  --text: #111;
-  --card: rgba(255, 255, 255, 0.5);
-  --blur: 14px;
-  --accent: #6c5ce7;
-  --shadow: rgba(0, 0, 0, 0.15);
-}
+/* dark mode */
+body.dark{--bg:#111;--card:#141414;--muted:#bbb;--text:#eee; --accent:#bda6ff}
+body.dark .topbar{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
 
-body.dark {
-  --bg: #0f0f0f;
-  --text: #fff;
-  --card: rgba(20, 20, 20, 0.55);
-  --accent: #a29bfe;
-  --shadow: rgba(255, 255, 255, 0.08);
-}
+/* filters */
+.filters{display:flex;gap:12px;align-items:center;margin:12px 0 24px}
+.filters input[type="text"]{padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);min-width:220px;background:transparent}
+.filters select{padding:10px;border-radius:10px}
+.filters button{background:var(--accent);color:#fff;padding:10px 14px;border-radius:14px;border:0}
 
-/* =====================================================
-   GLASS NAVIGATION BAR
-   ===================================================== */
-.glass-nav {
-  width: 100%;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--card);
-  backdrop-filter: blur(var(--blur));
-  padding: 15px 0;
-  box-shadow: 0 4px 20px var(--shadow);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-}
+/* grid cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:28px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.9), var(--card));border-radius:14px;padding:14px;box-shadow:0 8px 30px rgba(10,10,10,0.08);position:relative;overflow:hidden;min-height:300px;display:flex;flex-direction:column}
+body.dark .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), var(--card));box-shadow:0 8px 28px rgba(0,0,0,0.6)}
+.card img{width:100%;height:140px;object-fit:contain;background:linear-gradient(180deg,#f0f0f0,#e8e8e8);border-radius:8px;padding:12px}
+.card h3{margin:10px 0 6px;font-size:18px}
+.card .price{font-weight:700;color:var(--accent)}
+.card .cat{font-size:13px;color:var(--muted);margin-top:6px}
+.card .rating{margin-top:6px;color:#ffb74d;font-weight:700}
+.btn{display:inline-block;padding:12px 14px;border-radius:10px;margin-right:8px;background:var(--accent);color:#fff;text-decoration:none;margin-top:auto}
+.btn-outline{background:transparent;border:1px solid rgba(0,0,0,0.08);color:var(--muted);padding:10px 12px}
 
-.nav-container {
-  width: 92%;
-  margin: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+/* cart/checkout */
+.cart-box{background:var(--card);padding:20px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.08)}
+.flashes{margin-bottom:12px}
+.flash{padding:10px;border-radius:8px;margin-bottom:8px}
+.flash.success{background:#e8f5e9;color:#2e7d32}
+.flash.warning{background:#fff3e0;color:#ef6c00}
+.flash.danger{background:#ffebee;color:#c62828}
 
-.logo a {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--accent);
-  text-decoration: none;
-  letter-spacing: -1px;
-}
-
-.nav-links a {
-  margin-left: 18px;
-  font-weight: 500;
-  text-decoration: none;
-  color: var(--text);
-  transition: 0.25s;
-}
-
-.nav-links a:hover {
-  color: var(--accent);
-}
-
-/* =====================================================
-   PAGE CONTAINER
-   ===================================================== */
-.page-container {
-  width: 92%;
-  max-width: 1200px;
-  margin: 30px auto;
-}
-
-/* =====================================================
-   FLASH MESSAGES
-   ===================================================== */
-.flash-area { margin-bottom: 20px; }
-
-.flash {
-  padding: 12px 14px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.flash.success { background: #55efc4; color: #000; }
-.flash.warning { background: #ffeaa7; color: #000; }
-.flash.danger  { background: #ff7675; color: #fff; }
-.flash.info    { background: #74b9ff; color: #fff; }
-
-/* =====================================================
-   PRODUCT GRID
-   ===================================================== */
-.page-title {
-  font-size: 28px;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 25px;
-}
-
-/* =====================================================
-   GLASS CARD
-   ===================================================== */
-.glass-card {
-  background: var(--card);
-  backdrop-filter: blur(var(--blur));
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: 0 6px 20px var(--shadow);
-  transition: 0.25s ease;
-}
-
-.glass-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 30px var(--shadow);
-}
-
-/* =====================================================
-   PRODUCT CARD
-   ===================================================== */
-.product-card img {
-  width: 100%;
-  height: 210px;
-  object-fit: cover;
-  border-radius: 14px;
-}
-
-.product-card h3 {
-  margin-top: 10px;
-  font-size: 20px;
-}
-
-.price {
-  font-size: 20px;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.rating {
-  font-size: 15px;
-  margin-top: 5px;
-  color: gold;
-}
-
-.rating.no-rating {
-  color: gray;
-}
-
-.actions {
-  margin-top: 12px;
-  display: flex;
-  justify-content: space-between;
-}
-
-/* =====================================================
-   BUTTONS
-   ===================================================== */
-.btn, .btn-primary {
-  padding: 8px 16px;
-  background: var(--accent);
-  border-radius: 10px;
-  color: white;
-  text-decoration: none;
-  font-weight: 600;
-  transition: 0.25s;
-}
-
-.btn:hover, .btn-primary:hover {
-  opacity: 0.85;
-}
-
-/* =====================================================
-   FILTER BOX
-   ===================================================== */
-.filter-box {
-  margin-bottom: 25px;
-  display: flex;
-  gap: 14px;
-  padding: 15px;
-  align-items: center;
-}
-
-.filter-box input,
-.filter-box select {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-}
-
-.check-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* =====================================================
-   PRODUCT DETAIL PAGE
-   ===================================================== */
-.product-detail {
-  display: flex;
-  gap: 30px;
-  padding: 25px;
-}
-
-.product-image {
-  width: 420px;
-  height: 420px;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.info {
-  flex: 1;
-}
-
-.rate-box {
-  margin-top: 14px;
-}
-
-.rate-box select {
-  padding: 8px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  background: var(--card);
-  color: var(--text);
-}
-
-/* =====================================================
-   FOOTER
-   ===================================================== */
-.footer {
-  text-align: center;
-  padding: 15px;
-  margin-top: 40px;
-  opacity: 0.6;
-  font-size: 14px;
-}
+/* footer */
+footer{margin:60px 0;padding:30px;text-align:center;color:var(--muted)}
