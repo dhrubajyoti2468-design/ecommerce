@@ -1,23 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>Admin — Products</h2>
+
+<h2>Admin Dashboard</h2>
+
 <a class="btn" href="{{ url_for('admin_add') }}">Add Product</a>
-<table width="100%" style="margin-top:12px">
-  <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Category</th><th>Featured</th><th></th></tr></thead>
-  <tbody>
-    {% for p in products %}
-    <tr>
-      <td>{{ p.id }}</td>
-      <td>{{ p.name }}</td>
-      <td>₹{{ p.price }}</td>
-      <td>{{ p.category }}</td>
-      <td>{{ 'Yes' if p.featured else 'No' }}</td>
-      <td>
-        <a href="{{ url_for('admin_edit', pid=p.id) }}">Edit</a> |
-        <a href="{{ url_for('admin_delete', pid=p.id) }}">Delete</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+
+<div class="grid">
+  {% for p in products %}
+  <div class="card">
+    <img src="{{ p.img }}">
+    <h3>{{ p.name }}</h3>
+    <p>₹{{ p.price }}</p>
+
+    <a class="btn" href="{{ url_for('admin_edit', pid=p.id) }}">Edit</a>
+    <a class="btn btn-outline" href="{{ url_for('admin_delete', pid=p.id) }}">Delete</a>
+  </div>
+  {% endfor %}
+</div>
+
 {% endblock %}
