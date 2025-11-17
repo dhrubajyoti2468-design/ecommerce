@@ -5,8 +5,11 @@
   <h2>{{ product.name }}</h2>
   <div class="price">₹{{ product.price }}</div>
   <div class="cat">{{ product.category }}</div>
+
   {% if product.ratings and product.ratings|length > 0 %}
-    <div class="rating">Average: {{ '%.1f'|format((product.ratings|sum)/(product.ratings|length)) }} ({{ product.ratings|length }} ratings)</div>
+    {% set numeric = product.ratings|map('int')|list %}
+    {% set avg = (numeric|sum) / (numeric|length) %}
+    <div class="rating">Average: {{ '%.1f'|format(avg) }} ({{ numeric|length }} ratings)</div>
   {% else %}
     <div class="rating">No ratings yet</div>
   {% endif %}
@@ -14,7 +17,9 @@
   <form method="post" style="margin-top:16px">
     <label>Rate this product:
       <select name="rating">
-        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
+        <option value="1">1</option><option value="2">2</option>
+        <option value="3">3</option><option value="4">4</option>
+        <option value="5">5</option>
       </select>
     </label>
     <button class="btn" type="submit">Submit Rating</button>
